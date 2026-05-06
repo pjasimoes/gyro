@@ -10,9 +10,19 @@ EXECUTABLE=-o gyro
 SOURCES=gyro.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 
+OPENMP_SUPPORTED := $(shell printf 'int main(){return 0;}\n' | $(CC) -x c++ -fopenmp - -o /tmp/gyro_openmp_test >/dev/null 2>&1 && echo yes || echo no)
+
+ifeq ($(OPENMP_SUPPORTED),yes)
+ALL_CFLAGS=$(CFLAGS) $(COPENMP)
+ALL_LDFLAGS=$(CLIBS) $(COPENMP)
+else
+ALL_CFLAGS=$(CFLAGS)
+ALL_LDFLAGS=$(CLIBS)
+endif
+
 all:	
-	$(CC) $(CFLAGS) $(COPENMP) $(SOURCES)
-	$(CC) $(CLIBS) $(COPENMP) $(OBJECTS) $(EXECUTABLE)
+	$(CC) $(ALL_CFLAGS) $(SOURCES)
+	$(CC) $(ALL_LDFLAGS) $(OBJECTS) $(EXECUTABLE)
 
 single:	
 	$(CC) $(CFLAGS) $(SOURCES)
